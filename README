@@ -1,0 +1,4 @@
+gmail notifier
+
+App written in python to check for new mails in google mail,
+with support for gmail labels.
