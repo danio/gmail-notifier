@@ -27,6 +27,7 @@ class MainWindow(QtGui.QMainWindow):
         self.title = "gmail notifier"
         self.setWindowTitle(self.title)
         self.center()
+        self.timer = None
         
     def center(self):
         screen = QtGui.QDesktopWidget().screenGeometry()
@@ -84,11 +85,11 @@ class MainWindow(QtGui.QMainWindow):
 
     def on_update_clicked(self):
         self.check_mail()
-        if self.options.interval > 0:        
+        if not self.timer and self.options.interval > 0: 
             # start a timer to check mail
-             timer = QtCore.QTimer(self);
-             self.connect(timer, QtCore.SIGNAL("timeout()"), self.check_mail)
-             timer.start(self.options.interval * 1000);
+            self.timer = QtCore.QTimer(self);
+            self.connect(self.timer, QtCore.SIGNAL("timeout()"), self.check_mail)
+            self.timer.start(self.options.interval * 1000);
 
     def set_options(self, options):
         self.options = options
