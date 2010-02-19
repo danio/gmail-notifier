@@ -40,6 +40,7 @@ class MainWindow(QtGui.QMainWindow):
         self.password = QtGui.QLineEdit()
         self.password.setEchoMode(QtGui.QLineEdit.Password)
         self.update = QtGui.QPushButton("Update")
+        self.update.setDefault(True)
         self.connect(self.update
             , QtCore.SIGNAL("clicked()")
             , self.on_update_clicked)
@@ -112,5 +113,7 @@ if __name__ == "__main__":
     main_window.username.setText(options.user_name)
     main_window.set_options(options)
     main_window.show()
+    if options.user_name:
+        main_window.password.setFocus() # can only set focus once the widgets are created
     # Enter the main loop
     sys.exit(app.exec_())
