@@ -2,3 +2,8 @@ gmail notifier
 
 App written in python to check for new mails in google mail,
 with support for gmail labels.
+
+Requires:
+- PyQt4 http://www.riverbankcomputing.co.uk/software/pyqt
+- feedparser http://www.feedparser.org
+
