@@ -49,21 +49,51 @@ class MainWindow(QtGui.QMainWindow):
         v_box.addWidget(self.password)
         v_box.addWidget(self.update)
         v_box.addWidget(self.html_view)        
-        #Create central widget, add layout, and set
+        # Create central widget, add layout, and set
         central_widget = QtGui.QWidget()
         central_widget.setLayout(v_box)
         self.setCentralWidget(central_widget)
-               
-    def on_update_clicked(self):
+
+    def show_entries(self, entries):
+        html = "<table>" + "\n"
+        html += "<tr><th>Subject</th><th>Sender</th></tr>"
+        for i in xrange(len(entries)):
+            html += "<tr><td>" + entries[i].title + "</td>"
+            html += "<td>" + entries[i].author + "</td></tr>\n"
+        html += "</table>"
+        self.html_view.setHtml(html)
+
+    def check_mail(self):
         self.html_view.setHtml("Retrieving mail...")
         self.html_view.repaint()
-        url = _URL + self.label
-        self.html_view.setHtml(mail.getmail(url, self.username.text(), self.password.text()))
+        url = _URL + self.options.label
+        try:
+            entries = mail.getmail(url, self.username.text(), self.password.text())
+        except:
+            self.html_view.setHtml("Failed to open " + url + ".<p>Check your username and password.")
+            self.html_view.repaint()
+        else:                
+            if len(entries) == 0:
+                self.html_view.setHtml("No new mail.")
+                self.html_view.repaint()
+            else:
+                self.show_entries(entries)
+                self.html_view.repaint()
+                self.activateWindow()
+                self.raise_()
 
-    def set_label(self, label):
-        self.label = label
-        if self.label:
-            self.setWindowTitle(self.title + " - " + self.label)
+    def on_update_clicked(self):
+        self.check_mail()
+        if self.options.interval > 0:        
+            # start a timer to check mail
+             timer = QtCore.QTimer(self);
+             self.connect(timer, QtCore.SIGNAL("timeout()"), self.check_mail)
+             timer.start(self.options.interval * 1000);
+
+    def set_options(self, options):
+        self.options = options
+        if self.options.label:
+            self.setWindowTitle(self.title + " - " + self.options.label)
         
 if __name__ == "__main__":
     parser = OptionParser()
@@ -71,13 +101,15 @@ if __name__ == "__main__":
                       help="default user name")
     parser.add_option("-l", "--label", type="string", dest="label", default="",
                       help="Googlemail label to retrieve")
+    parser.add_option("-i", "--interval", type="int", dest="interval", default=0,
+                      help="Interval (seconds) to check mail - 0 to disable")
     (options, args) = parser.parse_args()
     # Someone is launching this directly
     app = QtGui.QApplication(sys.argv)
     #The Main window
     main_window = MainWindow()
     main_window.username.setText(options.user_name)
-    main_window.set_label(options.label)
+    main_window.set_options(options)
     main_window.show()
     # Enter the main loop
     sys.exit(app.exec_())
